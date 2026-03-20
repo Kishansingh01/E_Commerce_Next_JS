@@ -4,6 +4,7 @@ import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface ProductCardProps {
   product: Product;
@@ -11,15 +12,12 @@ interface ProductCardProps {
 
 const getProductEmoji = (category: string): string => {
   const emojis: { [key: string]: string } = {
-    'Cleansers': '🧼',
-    'Serums': '💧',
-    'Moisturizers': '🧴',
-    'Masks': '🎭',
-    'Eye Care': '👁️',
-    'Treatment': '💊',
-    'Bundles': '🎁',
+    'प्रथम श्रेणी ईंट': '🏆',
+    'द्वितीय श्रेणी ईंट': '⭐',
+    'तृतीय श्रेणी ईंट': '🧱',
+    'चतुर्थ श्रेणी ईंट': '🪨',
   };
-  return emojis[category] || '✨';
+  return emojis[category] || '🏭';
 };
 
 export default function ProductCard({ product }: ProductCardProps) {
@@ -45,38 +43,58 @@ export default function ProductCard({ product }: ProductCardProps) {
     <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group hover:-translate-y-3 relative border border-gray-100 flex flex-col h-full">
       {/* Product Image Section */}
       <Link href={`/products/${product.id}`}>
-        <div className="relative bg-gradient-to-br from-sage-green/5 via-terracotta/5 to-warm-cream/10 h-64 md:h-72 flex items-center justify-center overflow-hidden group-hover:bg-gradient-to-br group-hover:from-sage-green/10 cursor-pointer">
+        <div className="relative bg-linear-to-br from-sage-green/5 via-terracotta/5 to-warm-cream/10 h-64 md:h-72 flex items-center justify-center overflow-hidden group-hover:bg-linear-to-br group-hover:from-sage-green/10 cursor-pointer group-hover:to-terracotta/10 transition-all duration-300">
           {/* Discount Badge */}
           {discount > 0 && (
-            <div className="absolute top-4 right-4 bg-gradient-to-r from-terracotta to-orange-600 text-warm-cream px-4 py-2 rounded-full text-sm font-bold shadow-lg z-10 animate-pulse flex items-center gap-1">
+            <div className="absolute top-4 right-4 bg-linear-to-r from-terracotta to-orange-600 text-warm-cream px-4 py-2 rounded-full text-sm font-bold shadow-lg z-10 animate-pulse flex items-center gap-1">
               <span>🔥</span>
-              <span>Save {discount}%</span>
+              <span>₹{discount}% बचाएं</span>
             </div>
           )}
           
           {/* Stock Badge */}
           {product.inStock && (
             <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md z-10">
-              ✓ In Stock
+              ✓ स्टॉक में
             </div>
           )}
 
           {/* Product Image Area */}
-          <div className="flex flex-col items-center justify-center w-full h-full gap-3 group-hover:scale-105 transition-transform duration-300">
-            <div className="text-7xl drop-shadow-lg">{emoji}</div>
-            <p className="text-center text-dark-charcoal font-poppins font-bold text-lg px-4 drop-shadow">
-              {product.name}
-            </p>
+          <div className="flex items-center justify-center w-full h-full group-hover:scale-105 transition-transform duration-300 relative">
+            {product.image ? (
+              product.image.endsWith('.svg') ? (
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+              )
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-3">
+                <div className="text-7xl drop-shadow-lg">{emoji}</div>
+                <p className="text-center text-dark-charcoal font-poppins font-bold text-lg px-4 drop-shadow">
+                  {product.name}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </Link>
 
       {/* Success Overlay */}
       {showSuccess && (
-        <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center rounded-2xl z-50">
+        <div className="absolute inset-0 bg-linear-to-r from-green-500 to-emerald-600 flex items-center justify-center rounded-2xl z-50">
           <div className="text-center text-white">
             <div className="text-6xl mb-3 animate-bounce">✓</div>
-            <p className="font-poppins font-bold text-xl">Added to Cart!</p>
+            <p className="font-poppins font-bold text-xl">कार्ट में जोड़ा गया!</p>
             <p className="text-sm text-green-100 mt-2">{product.name}</p>
           </div>
         </div>
@@ -106,22 +124,22 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
           <div>
             <span className="font-bold text-dark-charcoal">{product.rating}</span>
-            <span className="text-gray-400 text-sm ml-1">({product.reviews} reviews)</span>
+            <span className="text-gray-400 text-sm ml-1">({product.reviews} समीक्षाएं)</span>
           </div>
         </div>
 
         {/* Price Section */}
         <div className="mb-5">
           <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-poppins font-bold text-terracotta">${product.price}</span>
+            <span className="text-3xl font-poppins font-bold text-terracotta">₹{product.price}</span>
             {product.comparePrice > product.price && (
-              <span className="text-lg text-gray-400 line-through">${product.comparePrice}</span>
+              <span className="text-lg text-gray-400 line-through">₹{product.comparePrice}</span>
             )}
           </div>
           {product.comparePrice > product.price && (
-            <p className="text-xs text-green-600 font-semibold mt-1">
-              💰 You save ${(product.comparePrice - product.price).toFixed(2)}
-            </p>
+            <span className="text-xs text-green-600 font-semibold mt-1">
+              💰 आप ₹{(product.comparePrice - product.price).toFixed(2)} की बचत करें
+            </span>
           )}
         </div>
 
@@ -131,7 +149,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           disabled={isAdding || !product.inStock}
           className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed mt-auto font-bold text-base py-3 transition-all duration-200 rounded-xl"
         >
-          {isAdding ? '⏳ Adding to Cart...' : product.inStock ? '🛒 Add to Cart' : 'Out of Stock'}
+          {isAdding ? '⏳ कार्ट में जोड़ा जा रहा है...' : product.inStock ? '🛒 कार्ट में डालें' : 'स्टॉक समाप्त'}
         </button>
       </div>
     </div>

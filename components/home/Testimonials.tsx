@@ -4,15 +4,15 @@ import { testimonials } from '@/data/testimonials';
 
 export default function Testimonials() {
   return (
-    <section className="bg-gradient-to-b from-warm-cream to-white section-spacing">
+    <section className="bg-linear-to-b from-warm-cream to-white section-spacing">
       <div className="container-main">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-poppins font-bold mb-4 text-dark-charcoal">
-            Customer Love ❤️
+            ग्राहक संतुष्टि ❤️
           </h2>
-          <div className="h-1.5 w-24 bg-gradient-to-r from-terracotta to-sage-green rounded-full mx-auto"></div>
+          <div className="h-1.5 w-24 bg-linear-to-r from-terracotta to-sage-green rounded-full mx-auto"></div>
           <p className="text-lg text-dark-charcoal/70 mt-6 max-w-2xl mx-auto">
-            Join thousands of happy customers who've transformed their skin
+            हजारों संतुष्ट ग्राहक हमारी ईंटों पर विश्वास करते हैं
           </p>
         </div>
 
@@ -30,7 +30,7 @@ export default function Testimonials() {
               </div>
               
               {/* Testimonial Text */}
-              <p className="text-dark-charcoal mb-6 italic font-open-sans text-lg leading-relaxed">
+              <p className="text-dark-charcoal mb-6 font-open-sans text-lg leading-relaxed">
                 "{testimonial.content}"
               </p>
               
@@ -39,7 +39,7 @@ export default function Testimonials() {
                 <p className="font-poppins font-bold text-dark-charcoal text-lg">
                   {testimonial.author}
                 </p>
-                <p className="text-terracotta text-sm font-semibold">Verified Customer</p>
+                <p className="text-terracotta text-sm font-semibold">सत्यापित ग्राहक</p>
               </div>
             </div>
           ))}

@@ -2,10 +2,10 @@
 
 export default function TrustBadges() {
   const badges = [
-    { icon: '✓', label: '100% Natural', color: 'from-green-50 to-green-100' },
-    { icon: '🐰', label: 'Cruelty-Free', color: 'from-pink-50 to-pink-100' },
-    { icon: '🌱', label: 'Organic Certified', color: 'from-emerald-50 to-emerald-100' },
-    { icon: '🔒', label: 'BPA-Free', color: 'from-blue-50 to-blue-100' },
+    { icon: '✓', label: 'सर्वोच्च गुणवत्ता', color: 'from-green-50 to-green-100' },
+    { icon: '🏭', label: 'औद्योगिक मानक', color: 'from-pink-50 to-pink-100' },
+    { icon: '🏗️', label: 'निर्माण के लिए प्रमाणित', color: 'from-emerald-50 to-emerald-100' },
+    { icon: '🔒', label: 'गारंटीशुदा', color: 'from-blue-50 to-blue-100' },
   ];
 
   return (

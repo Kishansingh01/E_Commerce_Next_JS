@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product } from '@/types';
+import { useAuth } from '@/context/AuthContext';
 
 export interface CartItem {
   product: Product;
@@ -20,86 +21,74 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+/** Returns a localStorage key scoped to the current user (or guest). */
+function cartKey(userId: string | undefined) {
+  return userId ? `bharat-cart-${userId}` : 'bharat-cart-guest';
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [mounted, setMounted] = useState(false);
 
-  // Load cart from localStorage on mount
+  // Reload cart whenever the logged-in user changes
   useEffect(() => {
-    const savedCart = localStorage.getItem('skincake-cart');
-    if (savedCart) {
+    const key = cartKey(user?.id);
+    const saved = localStorage.getItem(key);
+    if (saved) {
       try {
-        setCartItems(JSON.parse(savedCart));
-      } catch (error) {
-        console.error('Failed to load cart:', error);
+        setCartItems(JSON.parse(saved));
+      } catch {
+        setCartItems([]);
       }
+    } else {
+      setCartItems([]);
     }
     setMounted(true);
-  }, []);
+  }, [user?.id]); // <-- re-runs on login/logout
 
-  // Save cart to localStorage whenever it changes
+  // Persist cart to the correct key whenever items change
   useEffect(() => {
-    if (mounted) {
-      localStorage.setItem('skincake-cart', JSON.stringify(cartItems));
-    }
-  }, [cartItems, mounted]);
+    if (!mounted) return;
+    const key = cartKey(user?.id);
+    localStorage.setItem(key, JSON.stringify(cartItems));
+  }, [cartItems, mounted, user?.id]);
 
-  const addToCart = (product: Product, quantity: number = 1) => {
-    setCartItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.product.id === product.id);
-
-      if (existingItem) {
-        return prevItems.map((item) =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
+  const addToCart = (product: Product, quantity = 1) => {
+    setCartItems((prev) => {
+      const existing = prev.find((i) => i.product.id === product.id);
+      if (existing) {
+        return prev.map((i) =>
+          i.product.id === product.id
+            ? { ...i, quantity: i.quantity + quantity }
+            : i
         );
       }
-
-      return [...prevItems, { product, quantity }];
+      return [...prev, { product, quantity }];
     });
   };
 
-  const removeFromCart = (productId: string) => {
-    setCartItems((prevItems) =>
-      prevItems.filter((item) => item.product.id !== productId)
-    );
-  };
+  const removeFromCart = (productId: string) =>
+    setCartItems((prev) => prev.filter((i) => i.product.id !== productId));
 
   const updateQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-      return;
-    }
-
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
-      )
+    if (quantity <= 0) { removeFromCart(productId); return; }
+    setCartItems((prev) =>
+      prev.map((i) => (i.product.id === productId ? { ...i, quantity } : i))
     );
   };
 
-  const clearCart = () => {
-    setCartItems([]);
-  };
+  const clearCart = () => setCartItems([]);
 
-  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const cartCount = cartItems.reduce((t, i) => t + i.quantity, 0);
   const cartTotal = cartItems.reduce(
-    (total, item) => total + item.product.price * item.quantity,
+    (t, i) => t + i.product.price * i.quantity,
     0
   );
 
   return (
     <CartContext.Provider
-      value={{
-        cartItems,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        cartCount,
-        cartTotal,
-      }}
+      value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart, cartCount, cartTotal }}
     >
       {children}
     </CartContext.Provider>
@@ -107,9 +96,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useCart() {
-  const context = useContext(CartContext);
-  if (context === undefined) {
-    throw new Error('useCart must be used within a CartProvider');
-  }
-  return context;
+  const ctx = useContext(CartContext);
+  if (!ctx) throw new Error('useCart must be used within a CartProvider');
+  return ctx;
 }

@@ -1,50 +1,51 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
-import { Product } from '@/types';
 import { products } from '@/data/products';
 import { useCart } from '@/context/CartContext';
+import {
+  Star, ShoppingCart, Minus, Plus, ChevronRight,
+  Shield, Truck, RotateCcw, CheckCircle, ArrowLeft,
+} from 'lucide-react';
 
-const getProductEmoji = (category: string): string => {
-  const emojis: { [key: string]: string } = {
-    'Cleansers': '🧼',
-    'Serums': '💧',
-    'Moisturizers': '🧴',
-    'Masks': '🎭',
-    'Eye Care': '👁️',
-    'Treatment': '💊',
-    'Bundles': '🎁',
-  };
-  return emojis[category] || '✨';
+const categoryEmoji: Record<string, string> = {
+  'प्रथम श्रेणी ईंट': '🏆',
+  'द्वितीय श्रेणी ईंट': '⭐',
+  'तृतीय श्रेणी ईंट': '🧱',
+  'चतुर्थ श्रेणी ईंट': '🪨',
 };
 
 export default function ProductDetail() {
   const params = useParams();
   const productId = params.id as string;
   const { addToCart } = useCart();
-  
+
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  
-  const product = products.find(p => p.id === productId);
-  const relatedProducts = products.filter(p => p.category === product?.category && p.id !== productId).slice(0, 4);
-  
+  const [added, setAdded] = useState(false);
+  const [activeTab, setActiveTab] = useState<'description' | 'features' | 'shipping'>('description');
+
+  const product = products.find((p) => p.id === productId);
+  const related = products
+    .filter((p) => p.category === product?.category && p.id !== productId)
+    .slice(0, 4);
+
   if (!product) {
     return (
       <>
         <Header />
-        <main className="min-h-screen bg-warm-cream flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-4xl font-poppins font-bold text-dark-charcoal mb-4">Product Not Found</h1>
-            <p className="text-dark-charcoal/70 mb-6">The product you're looking for doesn't exist.</p>
-            <Link href="/shop" className="btn-primary inline-block">
-              Back to Shop
+        <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="text-7xl">😕</div>
+            <h1 className="text-2xl font-bold text-gray-800">उत्पाद नहीं मिला</h1>
+            <p className="text-gray-500">आप जिसे खोज रहे हैं वह उपलब्ध नहीं है।</p>
+            <Link href="/shop" className="inline-flex items-center gap-2 bg-[#4a7c59] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#3a6347] transition">
+              <ArrowLeft size={16} /> दुकान पर वापस
             </Link>
           </div>
         </main>
@@ -53,225 +54,278 @@ export default function ProductDetail() {
     );
   }
 
-  const discount = Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100);
-  const emoji = getProductEmoji(product.category);
-  const savings = (product.comparePrice - product.price).toFixed(2);
+  const discount = product.comparePrice > product.price
+    ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)
+    : 0;
+  const savings = (product.comparePrice - product.price).toFixed(0);
+  const emoji = categoryEmoji[product.category] || '🏭';
 
   const handleAddToCart = async () => {
     setIsAdding(true);
-    try {
-      for (let i = 0; i < quantity; i++) {
-        addToCart(product, 1);
-      }
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 2500);
-    } finally {
-      setIsAdding(false);
-    }
+    addToCart(product, quantity);
+    setTimeout(() => { setIsAdding(false); setAdded(true); }, 400);
+    setTimeout(() => setAdded(false), 2800);
   };
+
+  const fullStars = Math.floor(product.rating);
+  const hasHalf = product.rating - fullStars >= 0.5;
 
   return (
     <>
       <Header />
-      <main className="bg-warm-cream min-h-screen">
-        {/* Breadcrumb */}
-        <div className="container-main py-6">
-          <div className="flex items-center gap-2 text-sm text-dark-charcoal/70">
-            <Link href="/" className="hover:text-terracotta">Home</Link>
-            <span>/</span>
-            <Link href="/shop" className="hover:text-terracotta">Shop</Link>
-            <span>/</span>
-            <Link href={`/shop?category=${product.category}`} className="hover:text-terracotta">{product.category}</Link>
-            <span>/</span>
-            <span className="text-dark-charcoal font-semibold">{product.name}</span>
+      <main className="bg-gray-50 min-h-screen">
+
+        {/* ── Breadcrumb ── */}
+        <div className="bg-white border-b border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+            <div className="flex items-center gap-1.5 text-xs text-gray-400">
+              <Link href="/" className="hover:text-[#4a7c59] transition">होम</Link>
+              <ChevronRight size={13} />
+              <Link href="/shop" className="hover:text-[#4a7c59] transition">खरीदें</Link>
+              <ChevronRight size={13} />
+              <span className="text-gray-600 font-medium truncate max-w-[160px]">{product.name}</span>
+            </div>
           </div>
         </div>
 
-        {/* Product Details */}
-        <div className="container-main py-16">
-          <div className="grid md:grid-cols-2 gap-16 mb-20">
-            {/* Product Image */}
-            <div className="flex items-center justify-center">
-              <div className="relative w-full max-w-md bg-gradient-to-br from-sage-green/10 via-terracotta/5 to-warm-cream/20 rounded-3xl p-16 shadow-2xl">
-                {/* Discount Badge */}
-                {discount > 0 && (
-                  <div className="absolute top-6 right-6 bg-gradient-to-r from-terracotta to-orange-600 text-warm-cream px-6 py-3 rounded-full font-bold shadow-lg flex items-center gap-2 z-10">
-                    <span className="text-lg">🔥</span>
-                    <span>Save {discount}%</span>
+        {/* ── Main product section ── */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+          <div className="grid lg:grid-cols-2 gap-10 mb-16">
+
+            {/* Left — Image panel */}
+            <div className="flex flex-col gap-4">
+              <div className="relative bg-gradient-to-br from-[#4a7c59]/8 via-white to-[#c17232]/8 rounded-3xl border border-gray-100 shadow-sm overflow-hidden aspect-square flex items-center justify-center">
+                {/* Badges */}
+                <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
+                  <span className={`px-3 py-1.5 rounded-full text-xs font-bold shadow-sm ${product.inStock ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
+                    {product.inStock ? '● स्टॉक में' : '✗ स्टॉक समाप्त'}
+                  </span>
+                  {discount > 0 && (
+                    <span className="bg-[#c17232] text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">
+                      {discount}% OFF
+                    </span>
+                  )}
+                </div>
+
+                {/* Product visual */}
+                {product.image ? (
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-3/4 h-3/4 object-contain drop-shadow-xl"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-4 p-12">
+                    <div className="text-[120px] leading-none drop-shadow-2xl">{emoji}</div>
+                    <p className="text-center text-gray-500 text-sm font-medium px-6">{product.name}</p>
                   </div>
                 )}
+              </div>
 
-                {/* Stock Badge */}
-                <div className={`absolute top-6 left-6 px-4 py-2 rounded-full text-xs font-bold shadow-md z-10 ${
-                  product.inStock 
-                    ? 'bg-green-500 text-white' 
-                    : 'bg-red-500 text-white'
-                }`}>
-                  {product.inStock ? '✓ In Stock' : '✗ Out of Stock'}
-                </div>
-
-                {/* Product Image */}
-                <div className="flex flex-col items-center justify-center py-8">
-                  <div className="text-8xl drop-shadow-lg animate-bounce">{emoji}</div>
-                </div>
+              {/* Trust badges */}
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { icon: <Shield size={18} />, label: 'गुणवत्ता गारंटी' },
+                  { icon: <Truck size={18} />, label: 'तेज डिलीवरी' },
+                  { icon: <RotateCcw size={18} />, label: 'वापसी नीति' },
+                ].map((b) => (
+                  <div key={b.label} className="flex flex-col items-center gap-1.5 bg-white rounded-2xl border border-gray-100 py-3 px-2 shadow-sm">
+                    <span className="text-[#4a7c59]">{b.icon}</span>
+                    <span className="text-xs text-gray-500 text-center leading-tight">{b.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Product Information */}
-            <div className="flex flex-col justify-center space-y-10">
-              {/* Category */}
-              <div>
-                <span className="inline-block bg-terracotta/10 text-terracotta px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wide">
-                  {product.category}
-                </span>
-              </div>
+            {/* Right — Product info */}
+            <div className="flex flex-col gap-6">
+
+              {/* Category pill */}
+              <span className="inline-flex items-center gap-2 bg-[#4a7c59]/10 text-[#4a7c59] px-4 py-1.5 rounded-full text-xs font-semibold w-fit border border-[#4a7c59]/20">
+                {emoji} {product.category}
+              </span>
 
               {/* Title */}
               <div>
-                <h1 className="text-4xl md:text-5xl font-poppins font-bold text-dark-charcoal leading-tight mb-3">
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
                   {product.name}
                 </h1>
               </div>
 
               {/* Rating */}
-              <div className="pb-6 border-b-2 border-gray-200">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <div
-                        key={i}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition shadow-md ${
-                          i < Math.round(product.rating)
-                            ? 'bg-gradient-to-br from-yellow-400 to-yellow-500 text-yellow-900'
-                            : 'bg-gray-200 text-gray-400'
-                        }`}
-                      >
-                        ✓
-                      </div>
-                    ))}
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      size={18}
+                      className={
+                        i < fullStars
+                          ? 'fill-amber-400 text-amber-400'
+                          : i === fullStars && hasHalf
+                          ? 'fill-amber-200 text-amber-400'
+                          : 'fill-gray-200 text-gray-200'
+                      }
+                    />
+                  ))}
                 </div>
-                <div className="space-y-3">
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-4xl font-bold text-terracotta">{product.rating}</span>
-                    <span className="text-lg text-dark-charcoal/70">/ 5.0 Stars</span>
-                  </div>
-                  <div className="w-full bg-gradient-to-r from-gray-100 to-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
-                    <div
-                      className="h-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-400 transition-all duration-500 rounded-full shadow-lg"
-                      style={{ width: `${(product.rating / 5) * 100}%` }}
-                    ></div>
-                  </div>
-                  <p className="text-sm text-dark-charcoal/60 font-poppins mt-2">
-                    ⭐ Rated by {product.reviews.toLocaleString()} satisfied customers
-                  </p>
-                </div>
+                <span className="font-bold text-gray-800">{product.rating}</span>
+                <span className="text-gray-400 text-sm">({product.reviews.toLocaleString()} समीक्षाएं)</span>
               </div>
 
-              {/* Price Section */}
-              <div className="space-y-3">
-                <div className="flex items-baseline gap-4">
-                  <span className="text-5xl font-poppins font-bold text-terracotta">
-                    ${product.price}
-                  </span>
-                  {product.comparePrice > product.price && (
-                    <>
-                      <span className="text-2xl text-gray-400 line-through">
-                        ${product.comparePrice}
-                      </span>
-                      <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold">
-                        Save ${savings}
-                      </span>
-                    </>
+              {/* Price */}
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center justify-between">
+                <div>
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-4xl font-bold text-[#c17232]">₹{product.price}</span>
+                    {product.comparePrice > product.price && (
+                      <span className="text-xl text-gray-400 line-through">₹{product.comparePrice}</span>
+                    )}
+                  </div>
+                  {discount > 0 && (
+                    <p className="text-emerald-600 text-sm font-semibold mt-1">
+                      🎉 आप ₹{savings} बचा रहे हैं!
+                    </p>
                   )}
                 </div>
+                {discount > 0 && (
+                  <div className="bg-[#c17232]/10 text-[#c17232] text-2xl font-black rounded-2xl px-5 py-3 border border-[#c17232]/20">
+                    {discount}%<br /><span className="text-xs font-medium">OFF</span>
+                  </div>
+                )}
               </div>
 
-              {/* Description */}
-              <div className="bg-white rounded-xl p-8 border border-gray-200">
-                <h3 className="font-poppins font-bold text-lg mb-3 text-dark-charcoal">Description</h3>
-                <p className="text-dark-charcoal/80 leading-relaxed text-lg">
-                  {product.description}
-                </p>
-              </div>
-
-              {/* Add to Cart Section */}
-              <div className="space-y-4 pt-4">
-                <div className="flex items-center gap-4">
-                  <label className="font-poppins font-semibold text-dark-charcoal">Quantity:</label>
-                  <div className="flex items-center gap-3 bg-white rounded-lg border-2 border-gray-200 p-2">
+              {/* Quantity + Add to cart */}
+              <div className="space-y-3">
+                <label className="text-sm font-semibold text-gray-700">मात्रा चुनें</label>
+                <div className="flex items-center gap-3">
+                  {/* Quantity stepper */}
+                  <div className="flex items-center bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="px-3 py-1 text-xl text-terracotta hover:bg-gray-100 rounded transition"
+                      className="px-4 py-3 hover:bg-gray-50 text-gray-600 transition shrink-0"
                     >
-                      −
+                      <Minus size={16} />
                     </button>
-                    <span className="px-6 py-2 text-lg font-bold text-dark-charcoal">
-                      {quantity}
-                    </span>
+                    <input
+                      title="Quantity"
+                      type="number"
+                      min="1"
+                      value={quantity}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10);
+                        if (!isNaN(val) && val > 0) {
+                          setQuantity(val);
+                        } else if (e.target.value === '') {
+                          setQuantity('' as any); // allow backspacing
+                        }
+                      }}
+                      onBlur={() => {
+                        if (!quantity || quantity < 1) setQuantity(1);
+                      }}
+                      className="w-16 py-3 font-bold text-gray-900 text-lg text-center border-x border-y-0 border-gray-100 focus:outline-none focus:ring-0 appearance-none bg-transparent"
+                      style={{ MozAppearance: 'textfield' }}
+                    />
                     <button
                       onClick={() => setQuantity(quantity + 1)}
-                      className="px-3 py-1 text-xl text-terracotta hover:bg-gray-100 rounded transition"
+                      className="px-4 py-3 hover:bg-gray-50 text-gray-600 transition shrink-0"
                     >
-                      +
+                      <Plus size={16} />
                     </button>
                   </div>
+
+                  {/* Add to cart */}
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={!product.inStock || isAdding}
+                    className={`flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-xl font-bold text-base transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${
+                      added
+                        ? 'bg-emerald-500 text-white shadow-emerald-200'
+                        : 'bg-[#4a7c59] hover:bg-[#3a6347] text-white hover:shadow-lg'
+                    }`}
+                  >
+                    {added ? (
+                      <><CheckCircle size={20} /> कार्ट में जोड़ा गया!</>
+                    ) : isAdding ? (
+                      <><span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> जोड़ रहे हैं...</>
+                    ) : (
+                      <><ShoppingCart size={20} /> कार्ट में डालें ({quantity})</>
+                    )}
+                  </button>
                 </div>
-
-                <button
-                  onClick={handleAddToCart}
-                  disabled={!product.inStock || isAdding}
-                  className="w-full btn-primary text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed font-poppins font-bold"
-                >
-                  {isAdding ? 'Adding to Cart...' : `Add ${quantity} to Cart`}
-                </button>
-
-                {!product.inStock && (
-                  <p className="text-red-600 text-center font-semibold">This product is currently out of stock</p>
-                )}
-
-                {showSuccess && (
-                  <div className="bg-green-100 border-2 border-green-500 text-green-700 px-6 py-4 rounded-lg text-center font-poppins font-bold animate-pulse">
-                    ✓ Added {quantity} item(s) to your cart!
-                  </div>
-                )}
               </div>
 
-              {/* Product Features */}
-              <div className="bg-gradient-to-br from-sage-green/5 to-terracotta/5 rounded-xl p-8 space-y-4">
-                <h3 className="font-poppins font-bold text-lg text-dark-charcoal mb-4">Why Choose This?</h3>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">🌿</span>
-                    <span className="text-dark-charcoal/80">100% Natural Ingredients</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">🐰</span>
-                    <span className="text-dark-charcoal/80">Cruelty-Free & Vegan</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">✓</span>
-                    <span className="text-dark-charcoal/80">Dermatologist Tested</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">💚</span>
-                    <span className="text-dark-charcoal/80">Eco-Friendly Packaging</span>
-                  </div>
+              {/* Tabs */}
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="flex border-b border-gray-100">
+                  {(
+                    [['description', 'विवरण'], ['features', 'विशेषताएं'], ['shipping', 'शिपिंग']] as const
+                  ).map(([key, label]) => (
+                    <button
+                      key={key}
+                      onClick={() => setActiveTab(key)}
+                      className={`flex-1 py-3.5 text-sm font-semibold transition-all ${
+                        activeTab === key
+                          ? 'text-[#4a7c59] border-b-2 border-[#4a7c59] bg-[#4a7c59]/5'
+                          : 'text-gray-400 hover:text-gray-600'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <div className="p-5 text-sm text-gray-600 leading-relaxed">
+                  {activeTab === 'description' && (
+                    <p className="whitespace-pre-line leading-loose">{product.description}</p>
+                  )}
+                  {activeTab === 'features' && (
+                    <ul className="space-y-3">
+                      {[
+                        ['🏭', 'औद्योगिक मानदंड अनुरूप'],
+                        ['💪', 'उच्च मजबूती और टिकाऊपन'],
+                        ['✅', 'गुणवत्ता परीक्षित और प्रमाणित'],
+                        ['🌡️', 'मौसम प्रतिरोधी'],
+                        ['🔒', 'BIS मानक अनुपालन'],
+                      ].map(([icon, text]) => (
+                        <li key={text} className="flex items-center gap-3">
+                          <span className="text-lg shrink-0">{icon}</span>
+                          <span>{text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {activeTab === 'shipping' && (
+                    <ul className="space-y-3">
+                      {[
+                        ['🚚', '₹500+ ऑर्डर पर निःशुल्क डिलीवरी'],
+                        ['⏱️', '2-5 व्यावसायिक दिनों में डिलीवरी'],
+                        ['📦', 'सुरक्षित पैकेजिंग'],
+                        ['🔄', '7 दिनों में वापसी का विकल्प'],
+                      ].map(([icon, text]) => (
+                        <li key={text} className="flex items-center gap-3">
+                          <span className="text-lg shrink-0">{icon}</span>
+                          <span>{text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Related Products */}
-          {relatedProducts.length > 0 && (
+          {/* ── Related Products ── */}
+          {related.length > 0 && (
             <div>
-              <div className="mb-12">
-                <h2 className="text-h2 font-poppins font-bold text-dark-charcoal mb-2">Related Products</h2>
-                <div className="h-1 w-20 bg-gradient-to-r from-terracotta to-sage-green rounded"></div>
+              <div className="flex items-center gap-4 mb-8">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">संबंधित उत्पाद</h2>
+                  <div className="h-1 w-14 bg-[#c17232] rounded-full mt-2" />
+                </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                {relatedProducts.map(relProduct => (
-                  <ProductCard key={relProduct.id} product={relProduct} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {related.map((p) => (
+                  <ProductCard key={p.id} product={p} />
                 ))}
               </div>
             </div>

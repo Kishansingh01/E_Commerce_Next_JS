@@ -21,6 +21,9 @@ export default function Home() {
         <Testimonials />
         <Newsletter />
       </main>
+      <hr></hr>
+    
+      <br></br>
       <Footer />
     </>
   );

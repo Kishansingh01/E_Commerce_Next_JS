@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Background -->
+  <rect width="400" height="400" fill="#f0e6d2"/>
+  
+  <!-- Category badge -->
+  <rect x="20" y="20" width="120" height="35" rx="5" fill="#92400e"/>
+  <text x="80" y="42" font-family="Arial" font-size="16" font-weight="bold" fill="white" text-anchor="middle">तृतीय श्रेणी</text>
+  
+  <!-- Brick 1 - bulk -->
+  <rect x="50" y="80" width="120" height="80" fill="#704c22" stroke="#5a3a18" stroke-width="2"/>
+  <path d="M 50 95 L 170 95" stroke="#9a6e3d" stroke-width="1"/>
+  <path d="M 50 130 L 170 130" stroke="#9a6e3d" stroke-width="1"/>
+  <ellipse cx="75" cy="103" rx="4" ry="3" fill="#4a2c12" opacity="0.6"/>
+  <ellipse cx="140" cy="120" rx="5" ry="4" fill="#4a2c12" opacity="0.6"/>
+  
+  <!-- Brick 2 -->
+  <rect x="180" y="80" width="120" height="80" fill="#704c22" stroke="#5a3a18" stroke-width="2"/>
+  <path d="M 180 95 L 300 95" stroke="#9a6e3d" stroke-width="1"/>
+  <path d="M 180 130 L 300 130" stroke="#9a6e3d" stroke-width="1"/>
+  <ellipse cx="205" cy="110" rx="4" ry="3" fill="#4a2c12" opacity="0.6"/>
+  
+  <!-- Brick 3 -->
+  <rect x="310" y="80" width="40" height="80" fill="#704c22" stroke="#5a3a18" stroke-width="2"/>
+  
+  <!-- Brick 4 -->
+  <rect x="50" y="170" width="120" height="80" fill="#704c22" stroke="#5a3a18" stroke-width="2"/>
+  <path d="M 50 185 L 170 185" stroke="#9a6e3d" stroke-width="1"/>
+  <path d="M 50 220 L 170 220" stroke="#9a6e3d" stroke-width="1"/>
+  <ellipse cx="95" cy="198" rx="4" ry="3" fill="#4a2c12" opacity="0.6"/>
+  <ellipse cx="150" cy="215" rx="3" ry="3" fill="#4a2c12" opacity="0.6"/>
+  
+  <!-- Brick 5 -->
+  <rect x="180" y="170" width="120" height="80" fill="#704c22" stroke="#5a3a18" stroke-width="2"/>
+  <path d="M 180 185 L 300 185" stroke="#9a6e3d" stroke-width="1"/>
+  <path d="M 180 220 L 300 220" stroke="#9a6e3d" stroke-width="1"/>
+  
+  <!-- Bulk quantity icon (multiply symbol) -->
+  <g transform="translate(340, 200)">
+    <circle cx="0" cy="0" r="12" fill="#8b5cf6" stroke="#7c3aed" stroke-width="1"/>
+    <text x="0" y="5" font-family="Arial" font-size="16" font-weight="bold" fill="white" text-anchor="middle">×</text>
+  </g>
+  
+  <!-- Text info -->
+  <text x="200" y="290" font-family="Arial" font-size="18" font-weight="bold" fill="#3f3f3f" text-anchor="middle">बल्क उपलब्ध</text>
+  <text x="200" y="320" font-family="Arial" font-size="14" fill="#666" text-anchor="middle">थोक परियोजनाएं, किफायती</text>
+  <text x="200" y="350" font-family="Arial" font-size="16" font-weight="bold" fill="#92400e" text-anchor="middle">₹900</text>
+</svg>
